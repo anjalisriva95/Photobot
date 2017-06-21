@@ -39,14 +39,14 @@ def start_bot():
         elif choice=="g":
            insta_username = raw_input("Enter the username of the user: ")
            get_comment_list(insta_username)
-        #elif choice=="h":
-           #insta_username = raw_input("Enter the username of the user: ")
-           #make_a_comment(insta_username)
-        #elif choice=="i":
-           #insta_username = raw_input("Enter the username of the user: ")
-           #delete_negative_comment(insta_username)
-        #elif choice == "j":
-            #exit()
+        elif choice=="h":
+           insta_username = raw_input("Enter the username of the user: ")
+           make_a_comment(insta_username)
+        elif choice=="i":
+           insta_username = raw_input("Enter the username of the user: ")
+           delete_negative_comment(insta_username)
+        elif choice == "j":
+            exit()
         else:
             print "wrong choice"
             exit()
@@ -197,7 +197,7 @@ def like_a_post(insta_username):
     else:
         print 'Your like was unsuccessful. Try again!'
 
-#FUNCTION FOR FETCHING THE LIST OF COMMENTS ON THE RECENT POST OF THE USER
+#FUNCTION FOR FETCHING THE LIST OF PEOPLE HO COMMENTED ON THE RECENT POST OF THE USER
 
 def get_comment_list(insta_username):
     media_id = get_post_id(insta_username)
@@ -211,6 +211,54 @@ def get_comment_list(insta_username):
                 print 'Comment: %s || User: %s' % (comment_info['data'][x]['text'], comment_info['data'][x]['from']['username'])
         else:
             print 'There are no comments on this post!'
+    else:
+        print 'Status code other than 200 received!'
+
+#FUNCTION FOR MAKING A COMMENT ON THE RECENT POST OF THE USER
+
+def make_a_comment(insta_username):
+    media_id = get_post_id(insta_username)
+    comment_text = raw_input("Your comment: ")
+    payload = {"access_token": ACCESS_TOKEN, "text" : comment_text}
+    request_url = (BASE_URL + 'media/%s/comments') % (media_id)
+    print 'POST request url : %s' % (request_url)
+
+    make_comment = requests.post(request_url, payload).json()
+
+    if make_comment['meta']['code'] == 200:
+        print "Successfully added a new comment!"
+    else:
+        print "Unable to add comment. Try again!"
+
+#FUNCTION FOR DELETING THE NEGATIVE COMMENTS FROM THE POST OF THE USER
+
+def delete_negative_comment(insta_username):
+    media_id = get_post_id(insta_username)
+    request_url = (BASE_URL + 'media/%s/comments/?access_token=%s') % (media_id, ACCESS_TOKEN)
+    print 'GET request url : %s' % (request_url)
+    comment_info = requests.get(request_url).json()
+
+    if comment_info['meta']['code'] == 200:
+        if len(comment_info['data']):
+            #Here's a naive implementation of how to delete the negative comments :)
+            for x in range(0, len(comment_info['data'])):
+                comment_id = comment_info['data'][x]['id']
+                comment_text = comment_info['data'][x]['text']
+                blob = TextBlob(comment_text, analyzer=NaiveBayesAnalyzer())
+                if (blob.sentiment.p_neg > blob.sentiment.p_pos):
+                    print 'Negative comment : %s' % (comment_text)
+                    delete_url = (BASE_URL + 'media/%s/comments/%s/?access_token=%s') % (media_id, comment_id, ACCESS_TOKEN)
+                    print 'DELETE request url : %s' % (delete_url)
+                    delete_info = requests.delete(delete_url).json()
+
+                    if delete_info['meta']['code'] == 200:
+                        print 'Comment successfully deleted!\n'
+                    else:
+                        print 'Unable to delete comment!'
+                else:
+                    print 'Positive comment : %s\n' % (comment_text)
+        else:
+            print 'There are no existing comments on the post!'
     else:
         print 'Status code other than 200 received!'
 
