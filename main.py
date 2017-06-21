@@ -33,12 +33,12 @@ def start_bot():
         elif choice=="e":
            insta_username = raw_input("Enter the username of the user: ")
            get_like_list(insta_username)
-        #elif choice=="f":
-           #insta_username = raw_input("Enter the username of the user: ")
-           #like_a_post(insta_username)
-        #elif choice=="g":
-           #insta_username = raw_input("Enter the username of the user: ")
-           #get_comment_list(insta_username)
+        elif choice=="f":
+           insta_username = raw_input("Enter the username of the user: ")
+           like_a_post(insta_username)
+        elif choice=="g":
+           insta_username = raw_input("Enter the username of the user: ")
+           get_comment_list(insta_username)
         #elif choice=="h":
            #insta_username = raw_input("Enter the username of the user: ")
            #make_a_comment(insta_username)
@@ -181,6 +181,36 @@ def get_like_list(insta_username):
                 print likes_info['data'][x]['username']
         else:
                 print 'No user has liked the post yet!'
+    else:
+        print 'Status code other than 200 received!'
+
+#FUNCTION FOR LIKING THE RECENT POST OF THE USER
+
+def like_a_post(insta_username):
+    media_id = get_post_id(insta_username)
+    request_url = (BASE_URL + 'media/%s/likes') % (media_id)
+    payload = {"access_token": ACCESS_TOKEN}
+    print 'POST request url : %s' % (request_url)
+    post_a_like = requests.post(request_url, payload).json()
+    if post_a_like['meta']['code'] == 200:
+        print 'Like was successful!'
+    else:
+        print 'Your like was unsuccessful. Try again!'
+
+#FUNCTION FOR FETCHING THE LIST OF COMMENTS ON THE RECENT POST OF THE USER
+
+def get_comment_list(insta_username):
+    media_id = get_post_id(insta_username)
+    request_url = (BASE_URL + 'media/%s/comments?access_token=%s') % (media_id, ACCESS_TOKEN)
+    print 'GET request url : %s' % (request_url)
+    comment_info = requests.get(request_url).json()
+
+    if comment_info['meta']['code'] == 200:
+        if len(comment_info['data']):
+            for x in range(0, len(comment_info['data'])):
+                print 'Comment: %s || User: %s' % (comment_info['data'][x]['text'], comment_info['data'][x]['from']['username'])
+        else:
+            print 'There are no comments on this post!'
     else:
         print 'Status code other than 200 received!'
 
