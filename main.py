@@ -30,9 +30,9 @@ def start_bot():
         elif choice == "d":
             insta_username = raw_input("Enter the username of the user: ")
             get_user_post(insta_username)
-        #elif choice=="e":
-           #insta_username = raw_input("Enter the username of the user: ")
-           #get_like_list(insta_username)
+        elif choice=="e":
+           insta_username = raw_input("Enter the username of the user: ")
+           get_like_list(insta_username)
         #elif choice=="f":
            #insta_username = raw_input("Enter the username of the user: ")
            #like_a_post(insta_username)
@@ -146,5 +146,42 @@ def get_user_post(insta_username):
     else:
         print 'Status code other than 200 received!'
 
+#FUNCTION FOR FETCHING THE POST ID OF THE RECENT POST OF THE USER
+
+def get_post_id(insta_username):
+    user_id = get_user_id(insta_username)
+    if user_id == None:
+        print 'User does not exist!'
+        exit()
+    request_url = (BASE_URL + 'users/%s/media/recent/?access_token=%s') % (user_id, ACCESS_TOKEN)
+    print 'GET request url : %s' % (request_url)
+    user_media = requests.get(request_url).json()
+
+    if user_media['meta']['code'] == 200:
+        if len(user_media['data']):
+            return user_media['data'][0]['id']
+        else:
+            print 'There is no recent post of the user!'
+            exit()
+    else:
+        print 'Status code other than 200 received!'
+        exit()
+
+#FUNCTION FOR FETCHING THE LIST OF PEOPLE HO LIKED THE RECENT POST OF THE USER
+
+def get_like_list(insta_username):
+    media_id = get_post_id(insta_username)
+    request_url = (BASE_URL + 'media/%s/likes?access_token=%s') % (media_id, ACCESS_TOKEN)
+    print 'GET request url : %s' % (request_url)
+    likes_info = requests.get(request_url).json()
+
+    if likes_info['meta']['code'] == 200:
+        if len(likes_info['data']):
+            for x in range(0, len(likes_info['data'])):
+                print likes_info['data'][x]['username']
+        else:
+                print 'No user has liked the post yet!'
+    else:
+        print 'Status code other than 200 received!'
 
 start_bot()
