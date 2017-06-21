@@ -16,19 +16,4 @@ def self_info():
     else:
         print 'Status code other than 200 received!'
 
-def get_user_id():
-    user_name=raw_input("enter the appropriate user name")
-    request_url = (BASE_URL + 'users/search?q=%s&access_token=%s') % (user_name, ACCESS_TOKEN)
-    print 'GET request url : %s' % (request_url)
-    user_info = requests.get(request_url).json()
-
-    if user_info['meta']['code'] == 200:
-        if len(user_info['data']):
-            return user_info['data'][0]['id']
-        else:
-            return None
-    else:
-        print 'Status code other than 200 received!'
-        exit()
-
-get_user_id()
+self_info()
