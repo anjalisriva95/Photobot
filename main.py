@@ -17,7 +17,8 @@ def start_bot():
         print "g.Get a list of comments on the recent post of a user"
         print "h.Make a comment on the recent post of a user"
         print "i.Delete negative comments from the recent post of a user"
-        print "j.Exit"
+        print "j.Get the post recently liked by the owner"
+        print "k.Exit"
 
         choice = raw_input("Enter you choice: ")
         if choice == "a":
@@ -46,7 +47,7 @@ def start_bot():
            insta_username = raw_input("Enter the username of the user: ")
            delete_negative_comment(insta_username)
         elif choice == "j":
-            exit()
+            get_like_recent()
         else:
             print "wrong choice"
             exit()
@@ -197,7 +198,24 @@ def like_a_post(insta_username):
     else:
         print 'Your like was unsuccessful. Try again!'
 
-#FUNCTION FOR FETCHING THE LIST OF PEOPLE HO COMMENTED ON THE RECENT POST OF THE USER
+#FUNCTION FOR FETCHING THE RECENT POST LIKED BY THE OWNER
+
+def get_like_recent():
+    request_url = (BASE_URL + 'users/self/media/liked?access_token=%s') % (ACCESS_TOKEN)
+    print 'GET request url : %s' % (request_url)
+    user_media = requests.get(request_url).json()
+    if user_media['meta']['code'] == 200:
+        if len(user_media['data']):
+            image_name = user_media['data'][0]['id'] + '.jpeg'
+            image_url = user_media['data'][0]['images']['standard_resolution']['url']
+            urllib.urlretrieve(image_url, image_name)
+            print 'Your image has been downloaded!'
+        else:
+            print 'Post does not exist!'
+    else:
+        print 'Status code other than 200 received!'
+
+#FUNCTION FOR FETCHING THE LIST OF PEOPLE WHO COMMENTED ON THE RECENT POST OF THE USER
 
 def get_comment_list(insta_username):
     media_id = get_post_id(insta_username)
@@ -214,7 +232,7 @@ def get_comment_list(insta_username):
     else:
         print 'Status code other than 200 received!'
 
-#FUNCTION FOR MAKING A COMMENT ON THE RECENT POST OF THE USER
+#FUNCTION FOR MAKING ACOMMENT ON USER'S RECENT POST
 
 def make_a_comment(insta_username):
     media_id = get_post_id(insta_username)
