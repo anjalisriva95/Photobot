@@ -223,16 +223,19 @@ def get_comment_list(insta_username):
     print 'GET request url : %s' % (request_url)
     comment_info = requests.get(request_url).json()
 
-    if comment_info['meta']['code'] == 200:
+    if comment_info['meta']['code'] == 200:#"SOS" in secret_text.split()
         if len(comment_info['data']):
             for x in range(0, len(comment_info['data'])):
                 print 'Comment: %s || User: %s' % (comment_info['data'][x]['text'], comment_info['data'][x]['from']['username'])
+                if u"#coffee" in (comment_info['data'][x]['text']).split() or u"coffee" in (comment_info['data'][x]['text']).split() or u"COFFEE" in (comment_info['data'][x]['text']):
+                    print "Advertise about your coffee shop for the sake of marketting"
+                    make_a_comment(insta_username)
         else:
             print 'There are no comments on this post!'
     else:
         print 'Status code other than 200 received!'
 
-#FUNCTION FOR MAKING ACOMMENT ON USER'S RECENT POST
+#FUNCTION FOR MAKING A COMMENT ON USER'S RECENT POST
 
 def make_a_comment(insta_username):
     media_id = get_post_id(insta_username)
